@@ -10,6 +10,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from src.preprocess import load_data, fit_transformers, preprocess_for_training
 from src.model_artifact_manager import ModelArtifactManager
+from src.cleanup import cleanup_old_artifacts
 
 # ----- Đường dẫn lưu mô hình -----
 MODEL_PATH = "model/xgb_model.json"
@@ -90,6 +91,13 @@ def train():
         print(f"✅ Model artifacts uploaded to S3 with version: {version}")
     except Exception as e:
         print(f"❌ Error uploading to S3: {str(e)}")
+
+    # 👉 Cleanup old artifacts
+    try:
+        cleanup_old_artifacts(days_to_keep=7)  # Keep last 7 days of artifacts
+        print("✅ Cleanup completed successfully")
+    except Exception as e:
+        print(f"❌ Error during cleanup: {str(e)}")
 
 if __name__ == "__main__":
     train()
