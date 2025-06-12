@@ -25,7 +25,7 @@ mkdir -p /home/ubuntu/loan_scoring
 cd /home/ubuntu/loan_scoring
 
 # Clone repository (replace with your repository URL)
-git clone <your-repo-url> .
+git clone https://github.com/tuanhuu3264/ai_predict_loan_approve .
 
 # Install Python dependencies
 pip3 install -r requirements.txt
