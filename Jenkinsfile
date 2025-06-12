@@ -1,57 +1,28 @@
 pipeline {
     agent any
     
-    environment {
-        DOCKER_IMAGE = 'loan-prediction-app'
-        DOCKER_TAG = "latest"
-        DOCKER_REGISTRY = 'tuanhuu3264/hackathon'
-    }
-    
     stages {
-        stage('Build Docker Image') {
+        stage('Packaging') {
             steps {
-                script {
-                    // Build Docker image
-                    docker.build("${DOCKER_IMAGE}:${DOCKER_TAG}")
-                    
-                    // Push to registry
-                    docker.withRegistry("https://${DOCKER_REGISTRY}") {
-                        docker.image("${DOCKER_IMAGE}:${DOCKER_TAG}").push()
-                    }
+                sh 'docker build --pull --rm -f Dockerfile -t loan-prediction-app:latest .'
+            }
+        }
+
+        stage('Push to DockerHub') {
+            steps {
+                withDockerRegistry(credentialsId: 'dockerhub', url: 'https://index.docker.io/v1/') {
+                    sh 'docker tag loan-prediction-app:latest tuanhuu3264/hackathon:latest'
+                    sh 'docker push tuanhuu3264/hackathon:latest'
                 }
             }
         }
 
-        stage('Deploy Docker Container') {
-            when {
-                branch 'main'
-            }
+        stage('Deploy to Production') {
             steps {
-                script {
-                    // Stop and remove old container if exists
-                    sh 'docker stop loan-prediction-app || true'
-                    sh 'docker rm loan-prediction-app || true'
-                    
-                    // Run new container
-                    docker.image("${DOCKER_IMAGE}:${DOCKER_TAG}").run(
-                        '-d',
-                        '--name loan-prediction-app',
-                        '-p 8000:8000',
-                        '--restart unless-stopped'
-                    )
-                }
-            }
-        }
-
-        stage('Cleanup') {
-            steps {
-                script {
-                    // Clean up old Docker images
-                    sh '''
-                        docker image prune -f
-                        docker system prune -f
-                    '''
-                }
+                echo 'Deploying and cleaning'
+                sh 'docker container stop loan-prediction-app || echo "this container does not exist"'
+                sh 'echo y | docker system prune'
+                sh 'docker container run -d --name loan-prediction-app -p 8000:8000 tuanhuu3264/hackathon'
             }
         }
     }
@@ -60,6 +31,5 @@ pipeline {
         always {
             cleanWs()
         }
-        
     }
 } 
