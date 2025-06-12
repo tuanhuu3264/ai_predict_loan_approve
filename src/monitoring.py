@@ -49,7 +49,7 @@ class ModelMonitor:
             
             # Save to S3 for later analysis
             self.s3_client.put_object(
-                Bucket='your-bucket-name',
+                Bucket='hackathon-s322',
                 Key=f'predictions/{datetime.utcnow().strftime("%Y/%m/%d")}/prediction_{datetime.utcnow().timestamp()}.json',
                 Body=json.dumps(log_entry)
             )
