@@ -9,6 +9,7 @@ from sklearn.metrics import roc_auc_score
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from src.preprocess import load_data, fit_transformers, preprocess_for_training
+from src.model_artifact_manager import ModelArtifactManager
 
 # ----- Đường dẫn lưu mô hình -----
 MODEL_PATH = "model/xgb_model.json"
@@ -81,6 +82,14 @@ def train():
     y_pred = model.predict(dval)
     auc = roc_auc_score(y_val, y_pred)
     print(f"🎯 Validation AUC: {auc:.4f}")
+
+    # 👉 Upload artifacts to S3
+    try:
+        artifact_manager = ModelArtifactManager()
+        version = artifact_manager.upload_model_artifacts()
+        print(f"✅ Model artifacts uploaded to S3 with version: {version}")
+    except Exception as e:
+        print(f"❌ Error uploading to S3: {str(e)}")
 
 if __name__ == "__main__":
     train()
