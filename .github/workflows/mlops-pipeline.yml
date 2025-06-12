@@ -41,5 +41,11 @@ jobs:
         aws-region: ap-south-1
     - name: Deploy to EC2
       run: |
-        aws ec2-instance-connect ssh --instance-id ${{ secrets.EC2_INSTANCE_ID }} --os-user ubuntu --command "cd /home/ubuntu/loan_scoring && git pull && docker-compose up -d --build" 
+        # Create SSH key file
+        mkdir -p ~/.ssh
+        echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/ec2.pem
+        chmod 600 ~/.ssh/ec2.pem
+        
+        # Deploy using SSH
+        ssh -o StrictHostKeyChecking=no -i ~/.ssh/ec2.pem ubuntu@${{ secrets.EC2_HOST }} "cd /home/ubuntu/loan_scoring && git pull && docker-compose up -d --build" 
     
