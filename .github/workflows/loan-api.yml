@@ -48,9 +48,12 @@ jobs:
         username: ${{ secrets.EC2_USERNAME }}
         key: ${{ secrets.EC2_SSH_KEY }}
         script: |
-          # Create project directory if not exists
-          mkdir -p /home/ubuntu/loan_scoring
+          # Setup project directory
+          sudo mkdir -p /home/ubuntu/loan_scoring
+          sudo chown -R ubuntu:ubuntu /home/ubuntu/loan_scoring
           cd /home/ubuntu/loan_scoring
+          pwd
+          ls -la
           
           # Clean up old containers and images
           docker system prune -af --volumes
